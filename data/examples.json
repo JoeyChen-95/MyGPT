@@ -1,0 +1,62 @@
+[
+    {
+        "act": "Serve as a Legal Advisor",
+        "prompt": "I'd like you to act as my legal advisor. I'm currently facing a lawsuit for breach of contract. What should be my first step?"
+    },
+    {
+        "act": "Plan a Birthday Party",
+        "prompt": "I need your help to plan a birthday party for my 8-year-old child. Can you suggest some themes and activities?"
+    },
+    {
+        "act": "Advise on Time Management",
+        "prompt": "I struggle with managing my time effectively. Can you provide some techniques or tools that might help?"
+    },
+    {
+        "act": "Guide on Plant Care",
+        "prompt": "I've just bought a fern and I'm not sure how to care for it. Can you give me some tips?"
+    },
+    {
+        "act": "Suggest a Reading List",
+        "prompt": "I'm interested in learning about ancient civilizations. Could you suggest five books to start with?"
+    },
+    {
+        "act": "Offer Tech Gadget Recommendations",
+        "prompt": "I'm looking to buy a new laptop that's good for gaming and work. What are your top three recommendations?"
+    },
+    {
+        "act": "Provide Travel Itinerary for Paris",
+        "prompt": "I'm visiting Paris for three days. What itinerary would you suggest to cover the major attractions?"
+    },
+    {
+        "act": "Suggest Healthy Recipes",
+        "prompt": "I'm looking for some healthy, easy-to-make dinner recipes. What are your top three suggestions?"
+    },
+    {
+        "act": "Assist with Career Advice",
+        "prompt": "I'm thinking of changing my career to graphic design. What steps should I take to start in this field?"
+    },
+    {
+        "act": "Offer Meditation Techniques",
+        "prompt": "I'm new to meditation and feeling overwhelmed. Can you suggest a simple technique for a beginner?"
+    },
+    {
+        "act": "Guide on Learning a New Language",
+        "prompt": "I want to start learning Spanish. What resources or methods would you recommend for a beginner?"
+    },
+    {
+        "act": "Provide Workout Plan for Beginners",
+        "prompt": "I'm new to working out and want to start a fitness routine at home. Can you suggest a weekly plan?"
+    },
+    {
+        "act": "Suggest Home Decoration Ideas",
+        "prompt": "I'm redecorating my living room and looking for a modern yet cozy style. What are your suggestions?"
+    },
+    {
+        "act": "Advise on Personal Finance",
+        "prompt": "I need advice on how to better manage my personal finances and save money. What tips can you offer?"
+    },
+    {
+        "act": "Help with Cooking a Special Meal",
+        "prompt": "I want to cook a special dinner for my partner's birthday. Can you suggest a three-course meal plan?"
+    }
+]
