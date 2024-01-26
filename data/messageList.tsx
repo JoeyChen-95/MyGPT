@@ -1,4 +1,4 @@
-import { Message } from "@/types/chatd";
+import { Message } from "@/types/chat";
 
 export const exampleMessageList: Message[] = [
     {

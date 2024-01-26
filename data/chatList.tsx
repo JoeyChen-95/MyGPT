@@ -1,4 +1,4 @@
-import { Chat } from "@/types/chatd";
+import { Chat } from "@/types/chat";
 
 export const exampleChatList:Chat[]=[
     {

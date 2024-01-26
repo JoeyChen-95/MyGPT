@@ -1,4 +1,5 @@
-import { Chat } from "@/types/chatd"
+import { Chat } from "@/types/chat"
+import { resolve } from "path"
 
 export function groupByDate(chatList: Chat[]) {
     const groupMap = new Map<string, Chat[]>()
@@ -60,4 +61,12 @@ export function groupByDate(chatList: Chat[]) {
         )
     })
     return groupList
+}
+
+export function sleep(time: number) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve('time is up')
+        }, time)
+    })
 }

@@ -1,4 +1,4 @@
-import { Chat } from "@/types/chatd"
+import { Chat } from "@/types/chat"
 import { useEffect, useState } from "react"
 import { AiOutlineEdit } from "react-icons/ai"
 import { MdCheck, MdClose, MdDeleteOutline } from "react-icons/md"
