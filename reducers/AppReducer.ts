@@ -1,4 +1,4 @@
-import { Message } from "@/types/chat"
+import { Chat, Message } from "@/types/chat"
 import { act } from "react-dom/test-utils"
 
 // type of the global state, any file can use appcontext.tsx to modify the state
@@ -9,6 +9,8 @@ export type State = {
     messageList: Message[]
     //replying message ID
     streamingId: string
+    //current page
+    selectedChat?: Chat
 }
 
 //define action type's name in enum

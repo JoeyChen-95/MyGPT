@@ -11,16 +11,25 @@ export async function POST(request: NextRequest) {
             }
         })
         data.chatId = chat.id
+    } else {
+        await prisma.chat.update({
+            data: {
+                updateTime: new Date()
+            },
+            where: {
+                id: data.chatId
+            }
+        })
     }
     //upsert: if id exists->update current chat, if id does not exist->create new chat
     const message = await prisma.message.upsert({
         create: data,
         update: data,
-        where:{
+        where: {
             id
         }
     })
 
-    return NextResponse.json({code: 0,data: {message}})
+    return NextResponse.json({ code: 0, data: { message } })
 
 }

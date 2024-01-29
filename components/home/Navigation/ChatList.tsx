@@ -1,21 +1,54 @@
 import { groupByDate } from "@/components/common/util";
 import { Chat } from "@/types/chat";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ChatItem from "./ChatItem";
 import { exampleChatList } from "@/data/chatList";
 import { useEventBusContext } from "@/components/EventBusContext";
+import { useAppContext } from "@/components/AppContext";
+import { ActionType } from "@/reducers/AppReducer";
 
 
 export default function ChatList() {
-    const [chatList, setChatList] = useState<Chat[]>(exampleChatList)
-    const [selectedChat, setSelectedChat] = useState<Chat>()
+    const [chatList, setChatList] = useState<Chat[]>([])
+    const pageRef = useRef(1) // get the first page by default
     const groupList = useMemo(() => {
         return groupByDate(chatList)
     }, [chatList])
     const { subscribe, unsubscribe } = useEventBusContext()
+
+    const {
+        state: { selectedChat },
+        dispatch
+    } = useAppContext()
+
+    async function getData() {
+        const response = await fetch(`api/chat/list?page=${pageRef.current}`, {
+            method: "GET"
+        })
+
+        if (!response.ok) {
+            console.log(response.statusText)
+            return
+        }
+        const { data } = await response.json()
+
+        if (pageRef.current === 1) {
+            //if it is the first page, overwrite the list
+            setChatList(data.list)
+        } else {
+            //if other pages, append it to the end
+            setChatList((list) => list.concat(data.list))
+        }
+    }
+
+    useEffect(() => {
+        getData()
+    }, [])
+
     useEffect(() => {
         const callback: EventListener = () => {
-            console.log("fetchChatList")
+            pageRef.current = 1
+            getData()
         }
         subscribe("fetchChatList", callback)
         return () => unsubscribe("fetchChatList", callback)
@@ -34,9 +67,18 @@ export default function ChatList() {
                         <ul>
                             {list.map((item) => {
                                 const selected = selectedChat?.id === item.id
-                                return <ChatItem key={item.id} item={item} selected={selected} onSelected={(chat) => {
-                                    setSelectedChat(chat)
-                                }} />
+                                return <ChatItem
+                                    key={item.id}
+                                    item={item}
+                                    selected={selected}
+                                    onSelected={(chat) => {
+                                        // If we selected this chat, use dispatch to update the global state (global selected chat)
+                                        dispatch({
+                                            type:ActionType.UPDATE,
+                                            field:"selectedChat",
+                                            value: chat
+                                        })
+                                    }} />
                             })}
                         </ul>
                     </div>)

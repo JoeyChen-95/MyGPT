@@ -3,10 +3,47 @@ import { Message } from "@/types/chat"
 import { SiOpenai } from "react-icons/si"
 import Markdown from "@/components/common/Markdown"
 import { useAppContext } from "@/components/AppContext"
+import { ActionType } from "@/reducers/AppReducer"
+import { useEffect } from "react"
 export default function MessageList() {
     const {
-         state: { messageList , streamingId} 
+        state: { messageList, streamingId, selectedChat },
+        dispatch
     } = useAppContext()
+
+
+    // Get message list by a chatId
+    async function getData(chatId: string) {
+        const response = await fetch(`api/message/list?chatId=${chatId}`, {
+            method: "GET"
+        })
+
+        if (!response.ok) {
+            console.log(response.statusText)
+            return
+        }
+        const { data } = await response.json()
+        
+        //get message list now, then we can update the global message list
+        dispatch({
+            type: ActionType.UPDATE,
+            field: "messageList",
+            value: data.list
+        })
+    }
+
+    //Get the following message list, when we select a new chat
+    useEffect(()=>{
+        if(selectedChat){
+            getData(selectedChat.id)
+        }else{
+            dispatch({
+                type: ActionType.UPDATE,
+                field: "messageList",
+                value: []
+            })
+        }
+    },[selectedChat])
 
     return (
         <div className="w-full pt-10 pb-48 dark:text-gray-300">
@@ -30,9 +67,8 @@ export default function MessageList() {
                                 </div>
                                 {/* Message style: fill the rest of the space */}
                                 <div className="flex-1">
-                                    <Markdown>{`${message.content}${
-                                        message.id===streamingId?"▍":""
-                                    }`}</Markdown>
+                                    <Markdown>{`${message.content}${message.id === streamingId ? "▍" : ""
+                                        }`}</Markdown>
                                 </div>
                             </div>
                         </li>
