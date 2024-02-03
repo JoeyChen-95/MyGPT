@@ -14,18 +14,18 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Create .env.development file
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Create a file named `.env.development` to store your Azure OpenAI Service endpoint, api key and deployment named:
 
-## Learn More
+```
+AZURE_ENDPOINT=YOUR_ENDPOINT
+AZURE_API_KEY=YOUR_API_KEY
+AZURE_DEPLOYMENT_NAME_1=YOUR_DEPLOYMENT_NAME_FOR_GPT3.5
+AZURE_DEPLOYMENT_NAME_2=YOUR_DEPLOYMENT_NAME_FOR_GPT4.0
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+You need to register [Azure OpenAI Service](https://azure.microsoft.com/en-ca/products/ai-services/openai-service) and fill the following information in the file to use the functions.
 
 ## Deploy on Vercel
 
