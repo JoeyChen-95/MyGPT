@@ -7,12 +7,14 @@ import { PiLightningFill, PiShootingStarFill } from "react-icons/pi"
 export default function ModelSelect() {
     const models = [
         {
-            id: "gpt-3.5-turbo",
+            // this should use the deployment name(you can set it) in Azure when you deploy a model
+            id: "mychatgpt1234",
             name: "GPT-3.5",
             icon: PiLightningFill
         },
-        {
-            id: "gpt-4",
+        {   
+            // this should use the deployment name(you can set it) in Azure when you deploy a model
+            id: "mychatgpt4567",
             name: "GPT-4",
             icon: PiShootingStarFill
         }

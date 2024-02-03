@@ -20,8 +20,15 @@ export default function ChatList() {
         state: { selectedChat },
         dispatch
     } = useAppContext()
+    const loadMoreRef = useRef(null)
+    const hasMoreRef = useRef(false)
+    const loadingRef = useRef(false)
 
     async function getData() {
+        if(loadingRef.current){
+            return
+        }
+        loadingRef.current = true
         const response = await fetch(`api/chat/list?page=${pageRef.current}`, {
             method: "GET"
         })
@@ -30,7 +37,9 @@ export default function ChatList() {
             console.log(response.statusText)
             return
         }
+        
         const { data } = await response.json()
+        hasMoreRef.current = data.hasMore
 
         if (pageRef.current === 1) {
             //if it is the first page, overwrite the list
@@ -39,6 +48,8 @@ export default function ChatList() {
             //if other pages, append it to the end
             setChatList((list) => list.concat(data.list))
         }
+        pageRef.current++
+        loadingRef.current = false
     }
 
     useEffect(() => {
@@ -53,6 +64,25 @@ export default function ChatList() {
         subscribe("fetchChatList", callback)
         return () => unsubscribe("fetchChatList", callback)
     }, [])
+
+    useEffect(()=>{
+        let observer: IntersectionObserver | null = null
+        let div = loadMoreRef.current
+        if(div){
+            observer = new IntersectionObserver((entries)=>{
+                // if it has more data
+                if(entries[0].isIntersecting && hasMoreRef.current){
+                    getData()
+                }
+            })
+            observer.observe(div)
+        }
+        return ()=>{
+            if(observer && div){
+                observer.unobserve(div)
+            }
+        }
+    })
     return (
         <div className="flex-1 mb-[48px] mt-2 flex flex-col overflow-y-auto">
             {groupList.map(([date, list]) => {
@@ -84,8 +114,8 @@ export default function ChatList() {
                     </div>)
 
             })}
-
-
+            {/* If this div is loaded, assign itself to the flag "loadMoreRef" */}
+            <div ref={loadMoreRef}>&nbsp;</div>
         </div>
     )
 

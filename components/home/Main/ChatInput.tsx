@@ -1,9 +1,9 @@
 import { useAppContext } from "@/components/AppContext";
-import { useEventBusContext } from "@/components/EventBusContext";
+import { useEventBusContext, EventListner } from "@/components/EventBusContext";
 import Button from "@/components/common/Button";
 import { ActionType } from "@/reducers/AppReducer";
 import { Message, MessageRequestBody } from "@/types/chat";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiSend } from "react-icons/fi";
 import { MdRefresh } from "react-icons/md";
 import { PiLightningFill, PiStopBold } from "react-icons/pi";
@@ -18,9 +18,27 @@ export default function ChatInput() {
     const chatIdRef = useRef("")
     // Get message, model from global context
     const {
-        state: { messageList, currentModel, streamingId }, dispatch
+        state: { messageList, currentModel, streamingId, selectedChat }, dispatch
     } = useAppContext()
-    const { publish } = useEventBusContext()
+    const { publish, subscribe, unsubscribe } = useEventBusContext()
+
+    useEffect(() => {
+        const callback: EventListener = (data) => {
+            send(data)
+        }
+        subscribe("createNewChat", callback)
+        return () => unsubscribe("fetchChatList", callback)
+    }, [])
+
+    useEffect(() => {
+        if (chatIdRef.current === selectedChat?.id) {
+            return
+        }
+        chatIdRef.current = selectedChat?.id ?? "" // if id is null, copy a empty string
+        stopRef.current = true // we need to interrupt receiving 
+    }, [selectedChat])
+
+
 
     async function createorUpdateMessage(message: Message) {
         const response = await fetch("api/message/update", {
@@ -39,6 +57,11 @@ export default function ChatInput() {
         if (!chatIdRef.current) {
             chatIdRef.current = data.message.chatId
             publish("fetchChatList")
+            dispatch({
+                type: ActionType.UPDATE,
+                field: "selectedChat",
+                value: { id: chatIdRef.current }
+            })
         }
         return data.message
 
@@ -61,12 +84,12 @@ export default function ChatInput() {
 
     }
 
-    async function send() {
+    async function send(content: string) {
         //current message
         const message = await createorUpdateMessage({
             id: "",
             role: "user",
-            content: messageText,
+            content,
             chatId: chatIdRef.current
         })
         //get message list
@@ -76,6 +99,84 @@ export default function ChatInput() {
         dispatch({ type: ActionType.ADD_MESSAGE, message })
 
         doSend(messages)
+
+        if (!selectedChat?.title || selectedChat.title === "New Chat") {
+            updateChatTitle(messages)
+        }
+    }
+
+    async function updateChatTitle(messages: Message[]) {
+        const message: Message = {
+            id: "",
+            role: "user",
+            content: "Use 5 to 10 words to directly return to the brief topic of this sentence. No explanation, no punctuation, no modal particles, and no redundant text. If there is no topic, please return directly to 'New Chat'",
+            chatId: chatIdRef.current
+        }
+        
+        // Save the chatId in a temp variable, prevent switch chat when generating title
+        const chatId = chatIdRef.current
+
+        // integrate into one body, with current model
+        const body: MessageRequestBody = {
+            messages: [...messages, message],
+            model: currentModel
+        }
+
+        /* Send Message */
+        let response = await fetch("api/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        })
+        //check response code
+        if (!response.ok) {
+            console.log(response.statusText)
+            return
+        }
+        //check body ok
+        if (!response.body) {
+            console.log("body error")
+            return
+        }
+
+        /* Receive Message */
+
+        //Get the returned data stream
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        //flag: whether the GPT finishes 
+        let done = false;
+        //temp variable to store the GPT returned message
+        let title = ""
+        while (!done) {
+            const result = await reader.read()
+            done = result.done
+            //decode the stream into string
+            const chunk = decoder.decode(result.value)
+            //attach the decoded chunk to my content
+            title += chunk
+        }
+
+        response = await fetch("api/chat/update", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id: chatId, title })
+        })
+        //check response code
+        if (!response.ok) {
+            console.log(response.statusText)
+            return
+        }
+        const { code } = await response.json()
+        if (code === 0) {
+            //publish event: update chat list
+            publish("fetchChatList")
+
+        }
     }
 
     async function resend() {
@@ -102,6 +203,7 @@ export default function ChatInput() {
 
     // Send message
     async function doSend(messages: Message[]) {
+        stopRef.current = false
         // integrate into one body, with current model
         const body: MessageRequestBody = { messages, model: currentModel }
 
@@ -153,7 +255,6 @@ export default function ChatInput() {
         let content = ""
         while (!done) {
             if (stopRef.current) {
-                stopRef.current = false
                 controller.abort()
                 break
             }
@@ -236,7 +337,9 @@ export default function ChatInput() {
                         icon={FiSend}
                         disabled={messageText.trim() === "" || streamingId !== ""}
                         variant="primary"
-                        onClick={send}
+                        onClick={() => {
+                            send(messageText)
+                        }}
                     />
                 </div>
                 <footer

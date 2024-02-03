@@ -5,18 +5,33 @@ import { HiPlus } from "react-icons/hi"
 import { LuPanelLeft } from "react-icons/lu"
 
 export default function Navigation() {
-    const {dispatch}=useAppContext()
+    const { dispatch } = useAppContext()
     return (
         //space: 间距
         <div className='flex space-x-3'>
             {/* New chat button */}
-            <Button icon={HiPlus} variant="outline" className='flex-1'>New Chat</Button>
-            {/* Hide panel button */}
-            <Button 
-                icon={LuPanelLeft} 
+            <Button icon={HiPlus}
                 variant="outline"
-                onClick={()=>{
-                    dispatch({type: ActionType.UPDATE, field:"displayNavigation",value: false})
+                className='flex-1'
+                onClick={() => {
+                    dispatch({
+                        type: ActionType.UPDATE,
+                        field: "selectedChat",
+                        value: null // select selectedChat to null
+                    })
+                }}
+            >New Chat
+            </Button>
+            {/* Hide panel button */}
+            <Button
+                icon={LuPanelLeft}
+                variant="outline"
+                onClick={() => {
+                    dispatch({
+                        type: ActionType.UPDATE,
+                        field: "displayNavigation",
+                        value: false
+                    })
                 }}></Button>
         </div>
     )

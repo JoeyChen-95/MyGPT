@@ -1,3 +1,4 @@
+import { useEventBusContext } from "@/components/EventBusContext"
 import { Chat } from "@/types/chat"
 import { useEffect, useState } from "react"
 import { AiOutlineEdit } from "react-icons/ai"
@@ -15,13 +16,64 @@ export default function ChatItem({ item, selected, onSelected }: Props) {
     // Flow of delete: Select the chat->Press the "delete" button of the chat->Press the check button or cancel button
     const [editing, setEditing] = useState(false)//If press edit button, the chat will become editing
     const [deleteing, setDeleting] = useState(false) //If press delete button, the chat will become deleteing
-    
+    const [title, setTitle] = useState(item.title)
+    const { publish } = useEventBusContext()
+
+
     //When selected is changed, setEditing/setDeleting(false) will be triggered
     //When we switch to other chats(select other chats), the current selected chat's status should be reset
     useEffect(() => {
         setEditing(false)
         setDeleting(false)
     }, [selected])
+
+    useEffect(()=>{
+        setTitle(item.title)
+    },[item])
+
+
+    async function updateChat() {
+        const response = await fetch("api/chat/update", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id: item.id, title })
+        })
+        //check response code
+        if (!response.ok) {
+            console.log(response.statusText)
+            return
+        }
+        const { code } = await response.json()
+        if (code === 0) {
+            //publish event: update chat list
+            publish("fetchChatList")
+
+        }
+    }
+
+    async function deleteChat() {
+        const response = await fetch(`api/chat/delete?id=${item.id}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        //check response code
+        if (!response.ok) {
+            console.log(response.statusText)
+            return
+        }
+        const { code } = await response.json()
+        if (code === 0) {
+            //publish event: update chat list
+            publish("fetchChatList")
+
+        }
+    }
+
+
     return (
         <li
             onClick={() => {
@@ -40,10 +92,15 @@ export default function ChatItem({ item, selected, onSelected }: Props) {
             </div>
 
             {/* In editing mode, it should display an input */}
-            {editing ? <input
-                autoFocus={true}
-                className="flex-1 min-w-0 bg-transparent outline-none"
-                defaultValue={item.title} /> :
+            {editing ? (
+                <input
+                    autoFocus={true}
+                    className="flex-1 min-w-0 bg-transparent outline-none"
+                    value={title}
+                    onChange={(e) => {
+                        setTitle(e.target.value) // update temp chat title
+                    }}
+                />) :
                 //  Grow to fill the parent item's space, no wrap(next line), hide the overflow content 
                 <div className='relative flex-1 whitespace-nowrap overflow-hidden'>
                     {item.title}
@@ -61,15 +118,15 @@ export default function ChatItem({ item, selected, onSelected }: Props) {
             {/* Operation Button */}
             {selected && <div className="absolute right-1 flex">
                 {
-                    editing || deleteing? (<>
+                    editing || deleteing ? (<>
                         {/* Edit Button */}
                         <button
                             onClick={(e) => {
 
-                                if(deleteing){
-                                    console.log("deleted")
-                                }else{
-                                    console.log("edited")
+                                if (deleteing) {
+                                    deleteChat()
+                                } else {
+                                    updateChat()
                                 }
                                 setEditing(false)
                                 setDeleting(false)

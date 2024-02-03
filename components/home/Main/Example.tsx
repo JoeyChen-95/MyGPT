@@ -2,6 +2,7 @@ import { MdOutlineTipsAndUpdates } from "react-icons/md";
 import examples from "@/data/examples.json"
 import Button from "@/components/common/Button";
 import { useMemo, useState } from "react";
+import { useEventBusContext } from "@/components/EventBusContext";
 
 export default function Example() {
     const [showFull, setShowFull] = useState(false)
@@ -13,6 +14,9 @@ export default function Example() {
             return examples.slice(0, 7)
         }
     }, [showFull])
+
+    const { publish } = useEventBusContext()
+
     return (
         <>
             <div className='mt-20 mb-4 text-4xl'>
@@ -22,7 +26,11 @@ export default function Example() {
                 {list.map((item) => {
                     return (
                         <li key={item.act}>
-                            <Button>{item.act}</Button>
+                            <Button
+                                onClick={() => {
+                                    publish("createNewChat", item.prompt)
+                                }}
+                            >{item.act}</Button>
                         </li>
                     )
                 })
@@ -40,16 +48,16 @@ export default function Example() {
                         <div className="flex items-center w-full space-x-2">
                             {/* Divider */}
                             {/* Use flex-1 to allow a flex item to grow and shrink as needed, ignoring its initial size: */}
-                            <hr className="flex-1 border-t border-dotted border-gray-200 dark:border-gray-600"/>
-                            <Button onClick={()=>{
+                            <hr className="flex-1 border-t border-dotted border-gray-200 dark:border-gray-600" />
+                            <Button onClick={() => {
                                 setShowFull(true)
                             }}
                             >
                                 Show More
                             </Button>
                             {/* Divider */}
-                            <hr className="flex-1 border-t border-dotted border-gray-200 dark:border-gray-600"/>
-                        
+                            <hr className="flex-1 border-t border-dotted border-gray-200 dark:border-gray-600" />
+
                         </div>
                     </>
                 )}
